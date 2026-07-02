@@ -1,76 +1,57 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
-#include <cassert>
+
+// Include the Google Test framework
+#include <gtest/gtest.h>
 
 // Include the header we just built
 #include "include/CubicSpiral.hh"
 
-// Helper function to compare doubles with a tolerance
-bool is_close(double a, double b, double tol = 1e-3) {
-    return std::abs(a - b) < tol;
-}
-
-void test_cubic_spiral_convergence() {
-    std::cout << "--- Testing Cubic Spiral Boundary Value Problem ---\n";
-
+// Test case for a standard lane-change maneuver.
+// It checks that the optimizer converges and that the final state matches the goal.
+TEST(CubicSpiralTest, ConvergenceAndBoundaryConditions) {
     vprim::CubicSpiral spiral;
 
-    // Define a challenging but realistic boundary value problem
-    // e.g., a lane change maneuver
     vprim::SpatialState start(0.0, 0.0, 0.0, 0.0);
     vprim::SpatialState goal(10.0, 3.0, 0.0, 0.0); 
 
     // 1. Test Build Process
     bool success = spiral.build(start, goal);
-    
-    if (success) {
-        std::cout << "[PASS] Optimizer converged successfully.\n";
-    } else {
-        std::cout << "[FAIL] Optimizer failed to converge.\n";
-        return;
-    }
+    ASSERT_TRUE(success) << "Optimizer failed to converge for the lane change maneuver.";
 
     // 2. Validate Trajectory Length
     double length = spiral.get_cost();
-    std::cout << "Calculated Arc Length (S): " << length << " m\n";
-    assert(length > 10.0 && "Arc length should be greater than straight-line distance.");
+    ASSERT_GT(length, 10.0) << "Arc length should be greater than the straight-line distance.";
 
     // 3. Test Forward Kinematics (Evaluation)
     vprim::SpatialState final_state = spiral.eval(length);
-
-    std::cout << "\nTarget Goal vs Evaluated Final State:\n";
-    std::cout << std::fixed << std::setprecision(4);
-    std::cout << "X:   Target = " << goal.x << " | Actual = " << final_state.x << "\n";
-    std::cout << "Y:   Target = " << goal.y << " | Actual = " << final_state.y << "\n";
-    std::cout << "Yaw: Target = " << goal.theta << " | Actual = " << final_state.theta << "\n";
-    std::cout << "K:   Target = " << goal.kappa << " | Actual = " << final_state.kappa << "\n";
-
-    // 4. Assert exact boundary matching
-    assert(is_close(final_state.x, goal.x) && "X coordinate mismatch");
-    assert(is_close(final_state.y, goal.y) && "Y coordinate mismatch");
-    assert(is_close(final_state.theta, goal.theta) && "Heading mismatch");
-    assert(is_close(final_state.kappa, goal.kappa) && "Curvature mismatch");
-
-    std::cout << "[PASS] Boundary conditions met within tolerance.\n\n";
+    
+    // 4. Assert boundary matching using EXPECT_NEAR for robust floating-point comparison.
+    double tolerance = 1e-3;
+    EXPECT_NEAR(final_state.x, goal.x, tolerance);
+    EXPECT_NEAR(final_state.y, goal.y, tolerance);
+    EXPECT_NEAR(final_state.theta, goal.theta, tolerance);
+    EXPECT_NEAR(final_state.kappa, goal.kappa, tolerance);
 }
 
-void print_trajectory_profile() {
-    std::cout << "--- Printing Trajectory Profile ---\n";
-    
+// This test builds a more complex trajectory and prints its profile for visual inspection.
+// The main assertion is that the build process succeeds.
+TEST(CubicSpiralTest, ProfileGeneration) {
     vprim::CubicSpiral spiral;
     vprim::SpatialState start(0.0, 0.0, 0.0, 0.0);
-    vprim::SpatialState goal(10.0, 5.0, M_PI/4.0, 0.0); // 90-degree right turn equivalent
+    vprim::SpatialState goal(10.0, 5.0, M_PI/4.0, 0.0); // 45-degree right turn
 
-    if (!spiral.build(start, goal)) {
-        std::cout << "Failed to build trajectory for profiling.\n";
-        return;
-    }
+    bool success = spiral.build(start, goal);
+    ASSERT_TRUE(success) << "Failed to build trajectory for profiling.";
 
     double S = spiral.get_cost();
     int steps = 10;
     double ds = S / steps;
 
+    // Printing to cout is fine within a test for debugging or visualization.
+    // GTest will capture the output and display it on test failure.
+    std::cout << "--- Trajectory Profile for 45-degree turn ---\n";
     std::cout << std::setw(10) << "s (m)" 
               << std::setw(10) << "x (m)" 
               << std::setw(10) << "y (m)" 
@@ -89,13 +70,8 @@ void print_trajectory_profile() {
                   << std::setw(10) << state.theta
                   << std::setw(10) << state.kappa << "\n";
     }
-    std::cout << "[PASS] Trajectory profile generated.\n";
+    std::cout << std::endl; // Add a final newline for clean test output.
 }
 
-int main() {
-    test_cubic_spiral_convergence();
-    print_trajectory_profile();
-    
-    std::cout << "\nAll vprim tests completed successfully.\n";
-    return 0;
-}
+// The main() function is provided by the GTest_main library,
+// so we no longer need to define it ourselves.

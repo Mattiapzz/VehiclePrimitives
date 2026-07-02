@@ -1,6 +1,4 @@
-#include <iostream>
-#include <array>
-#include <memory>
+
 
 namespace vprim {
 
@@ -9,7 +7,13 @@ namespace vprim {
     template <typename T_State, typename T_Param = double>
     class MotionPrimitive {
     public:
+        MotionPrimitive() = default;
         virtual ~MotionPrimitive() = default;
+        // copy and move constructors/assignment operators
+        MotionPrimitive(const MotionPrimitive&) = default;
+        MotionPrimitive& operator=(const MotionPrimitive&) = default;
+        MotionPrimitive(MotionPrimitive&&) = default;
+        MotionPrimitive& operator=(MotionPrimitive&&) = default;
 
         // Force derived classes to implement a solver for the transient
         // Returns true if a valid primitive was found, false if infeasible

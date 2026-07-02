@@ -17,12 +17,12 @@ namespace vprim {
 
     // A lightweight struct for spatial paths (no dependency on Eigen)
     struct SpatialState {
-        double x;      // x position
-        double y;      // y position
-        double theta;  // heading angle
-        double kappa;  // curvature
+        double x{0.0};      // x position
+        double y{0.0};      // y position
+        double theta{0.0};  // heading angle
+        double kappa{0.0};  // curvature
 
-        SpatialState() : x(0.0), y(0.0), theta(0.0), kappa(0.0) {}
+        SpatialState() = default;
 
         // Constructor to initialize with specific values
         SpatialState(double _x, double _y, double _theta, double _kappa) : x(_x), y(_y), theta(_theta), kappa(_kappa) {}
@@ -41,18 +41,26 @@ namespace vprim {
         double integrate_simpson(std::function<double(double)> func, double a, double b, int n_intervals = 16) const;
 
         // Analytical heading evaluation
-        double eval_yaw(double s) const;
+        [[nodiscard]] double eval_yaw(double s) const;
 
         std::array<double, 4> solve_4x4(std::array<std::array<double, 4>, 4> A, std::array<double, 4> b) const;
 
     public:
         CubicSpiral() = default;
+        ~CubicSpiral() override = default;
+
+
+        // copy and move constructors/assignment operators 
+        CubicSpiral(const CubicSpiral&) = default;
+        CubicSpiral& operator=(const CubicSpiral&) = default;
+        CubicSpiral(CubicSpiral&&) = default;
+        CubicSpiral& operator=(CubicSpiral&&) = default;
 
         bool build(const SpatialState& start, const SpatialState& goal) override;
 
-        SpatialState eval(double s) const override;
+        [[nodiscard]] SpatialState eval(double s) const override;
 
-        double get_cost() const override;
+        [[nodiscard]] double get_cost() const override;
     };
 
 } // namespace vprim
