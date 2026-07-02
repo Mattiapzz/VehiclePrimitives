@@ -1,0 +1,6 @@
+build
+bin
+lib
+lib3d
+
+*.idx
