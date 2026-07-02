@@ -1,3 +1,7 @@
+/*
+This file serves as (more than) dummy example code for primitives. It is not intended to be used in production, but rather to illustrate how to implement a new primitive type.
+*/
+
 #pragma once    
 
 #ifndef VPRIM_CUBIC_SPIRAL_HH
@@ -7,7 +11,6 @@
 #include <array>
 #include <functional>
 #include "MotionPrimitive.hh"
-
 
 
 namespace vprim {
