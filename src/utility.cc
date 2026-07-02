@@ -38,4 +38,31 @@ namespace vprim {
     return result;
   }
 
+  
+  std::optional<double> Polynomial::closest_root(double initial_guess, const RootSolverOptions& options) const
+  {
+    Polynomial poly_deriv = this->derivative();
+    double t = initial_guess;
+    double alpha_pow4 = options.alpha * options.alpha * options.alpha * options.alpha; 
+
+    for (int iter = 0; iter < options.max_iter; ++iter) {
+      double f = this->eval(t);
+      double f1 = poly_deriv.eval(t);
+
+      if (std::abs(f) < options.func_tolerance) {
+        return t;
+      }
+
+      double step = (std::abs(f1) < options.step_tolerance) ? (alpha_pow4 * f) : (options.alpha * (f / f1));
+      double t_next = t - step;
+
+      if (std::abs(t_next - t) < options.step_tolerance) {
+        return t_next;
+      }
+      t = t_next;
+    }
+    return std::nullopt; 
+  }
+
+
 } // namespace vprim

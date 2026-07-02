@@ -10,35 +10,56 @@
 
 namespace vprim {
 
-    class Polynomial {
-    private:
-        // Coefficients stored as: c[0] + c[1]*t + c[2]*t^2 + ... + c[n]*t^n
-        std::vector<double> c_;
+  struct RootSolverOptions {
+      int max_iter = 50;
+      double alpha = 1.0;
+      double step_tolerance = 1e-6;
+      double func_tolerance = 1e-6;
+  };
+  //
+  // And update the function signature to:
+  // [[nodiscard]] std::optional<double> closest_root(
+  //   double initial_guess,
+  //   const RootSolverOptions& options = {}
+  // ) const;
 
-    public:
-        Polynomial() = default;
+  class Polynomial {
+  private:
+    // Coefficients stored as: c[0] + c[1]*t + c[2]*t^2 + ... + c[n]*t^n
+    std::vector<double> c_;
 
-        // Construct with a specific degree (initializes all to 0.0)
-        explicit Polynomial(int degree) : c_(degree + 1, 0.0) {}
+  public:
+    Polynomial() = default;
 
-        // Clean C++11 initializer: Polynomial p = {c0, c1, c2, c3};
-        Polynomial(std::initializer_list<double> coeffs) : c_(coeffs) {}
+    // Construct with a specific degree (initializes all to 0.0)
+    explicit Polynomial(int degree) : c_(degree + 1, 0.0) {}
 
-        // Accessors
-        double& operator[](size_t i) { return c_[i]; }
-        const double& operator[](size_t i) const { return c_[i]; }
+    // Clean C++11 initializer: Polynomial p = {c0, c1, c2, c3};
+    Polynomial(std::initializer_list<double> coeffs) : c_(coeffs) {}
 
-        size_t degree() const;
+    // Accessors
+    double& operator[](size_t i) { return c_[i]; }
+    const double& operator[](size_t i) const { return c_[i]; }
 
-        // Horner's Method: O(N) complexity, extremely stable, no pow() calls
-        double eval(double x) const;
+    [[nodiscard]] size_t degree() const;
 
-        // Returns a completely new Polynomial representing the mathematical derivative
-        Polynomial derivative() const;
+    // Horner's Method: O(N) complexity, extremely stable, no pow() calls
+    [[nodiscard]] double eval(double x) const;
 
-        // Generates the n-th derivative recursively
-        Polynomial derivative(int n) const;
-    };
+    // Returns a completely new Polynomial representing the mathematical derivative
+    [[nodiscard]] Polynomial derivative() const;
+
+    // Generates the n-th derivative recursively
+    [[nodiscard]] Polynomial derivative(int n) const;
+
+    [[nodiscard]] std::optional<double> closest_root(
+      double initial_guess,
+      const RootSolverOptions& options = {}
+    ) const;
+  };
+
+
+
 
 } // namespace vprim
 
