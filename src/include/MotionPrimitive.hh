@@ -1,4 +1,7 @@
+#pragma once
 
+#ifndef VPRIM_MOTION_PRIMITIVE_HH
+#define VPRIM_MOTION_PRIMITIVE_HH
 
 namespace vprim {
 
@@ -27,3 +30,5 @@ namespace vprim {
     };
 
 } // namespace vprim
+
+#endif // VPRIM_MOTION_PRIMITIVE_HH
