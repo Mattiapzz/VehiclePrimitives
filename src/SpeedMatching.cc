@@ -32,15 +32,16 @@ bool SpeedMatching::build(
   is_valid_ = true;
 
   double ds = goal.s - start.s;
+  double jmax2 = jmax_ * jmax_;
 
   // 1. Setup the 6th-degree polynomial to find the minimum time T
   Polynomial T_poly = {
-    -3600.0 * ds * ds,
-    2880.0 * ds * (start.v + goal.v),
-    (360.0 * start.a - 360.0 * goal.a) * ds - 576.0 * start.v * start.v - 1008.0 * start.v * goal.v - 576.0 * goal.v * goal.v,
-    (-144.0 * start.v - 96.0 * goal.v) * start.a + 96.0 * (start.v + 1.5 * goal.v) * goal.a,
-    -9.0 * start.a * start.a + 6.0 * start.a * goal.a - 9.0 * goal.a * goal.a,
-    0.0,
+    ( -3600.0 * ds * ds ) / jmax2,
+    ( 2880.0 * ds * (start.v + goal.v) ) / jmax2,
+    ( (360.0 * start.a - 360.0 * goal.a) * ds - 576.0 * start.v * start.v - 1008.0 * start.v * goal.v - 576.0 * goal.v * goal.v ) / jmax2,
+    ( (-144.0 * start.v - 96.0 * goal.v) * start.a + 96.0 * (start.v + 1.5 * goal.v) * goal.a ) / jmax2,
+    ( -9.0 * start.a * start.a + 6.0 * start.a * goal.a - 9.0 * goal.a * goal.a ) / jmax2,
+    ( 0.0 ) / jmax2,
     wT_
   };
 
@@ -84,11 +85,11 @@ bool SpeedMatching::build(
 
   // 6. Compute Final Analytical Cost
   cost_ = (wT_ * T_) 
-        + ((9.0 * start.a * start.a - 6.0 * start.a * goal.a + 9.0 * goal.a * goal.a) / T_) 
-        + (((72.0 * start.v + 48.0 * goal.v) * start.a) - 48.0 * (start.v + 1.5 * goal.v) * goal.a) / T2
-        + ((-120.0 * start.a * ds + 120.0 * goal.a * ds + 192.0 * start.v * start.v + 336.0 * start.v * goal.v + 192.0 * goal.v * goal.v) / T3) 
-        - (720.0 * ds * (start.v + goal.v) / T4) 
-        + (720.0 * ds * ds / T5);
+        + ( ((9.0 * start.a * start.a - 6.0 * start.a * goal.a + 9.0 * goal.a * goal.a) / T_) ) / jmax2
+        + ( (((72.0 * start.v + 48.0 * goal.v) * start.a) - 48.0 * (start.v + 1.5 * goal.v) * goal.a) / T2) / jmax2
+        + ( ((-120.0 * start.a * ds + 120.0 * goal.a * ds + 192.0 * start.v * start.v + 336.0 * start.v * goal.v + 192.0 * goal.v * goal.v) / T3) ) / jmax2
+        - ( (720.0 * ds * (start.v + goal.v) / T4) ) / jmax2
+        + ( (720.0 * ds * ds / T5) ) / jmax2;
 
   return is_valid_;
 }

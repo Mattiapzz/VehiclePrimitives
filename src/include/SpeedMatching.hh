@@ -31,6 +31,7 @@ namespace vprim {
     private:
         LongitudinalState start_state_;
         double wT_{1.0}; // Weight on time optimization
+        double jmax_{10.0}; // Jerk limit
         double T_{0.0};  // Optimal travel time
         double cost_{0.0};
         bool is_valid_{false};
@@ -46,9 +47,11 @@ namespace vprim {
 
     public:
         SpeedMatching() = default;
-        explicit SpeedMatching(double weight_time) : wT_(weight_time) {}
+        explicit SpeedMatching(double weight_time, double jerk_limit = 10.0) : wT_(weight_time), jmax_(jerk_limit) {};
 
         void set_time_weight(double wT) { wT_ = wT; }
+        void set_jerk_limit(double jmax) { jmax_ = jmax; }
+
         [[nodiscard]] double get_T() const { return T_; }
         [[nodiscard]] bool is_ok() const { return is_valid_; }
 

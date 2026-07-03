@@ -4,3 +4,6 @@ lib
 lib3d
 
 *.idx
+
+python_bindings/*.egg-info
+python_bindings/*.so
