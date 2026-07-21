@@ -25,8 +25,8 @@ bool SpeedMatching::check_velocity() const {
 
 
 bool SpeedMatching::build(
-  const LongitudinalState& start, 
-  const LongitudinalState& goal)  
+  const LongitudinalState& start,
+  const LongitudinalState& goal)
 {
   start_state_ = start;
   is_valid_ = true;
@@ -56,7 +56,36 @@ bool SpeedMatching::build(
       is_valid_ = false;
       return false;
   }
-  T_ = root_opt.value();
+
+  return build_with_time(start, goal, root_opt.value());
+}
+
+
+bool SpeedMatching::build_fixed_time(
+  const LongitudinalState& start,
+  const LongitudinalState& goal,
+  double T)
+{
+  start_state_ = start;
+  is_valid_ = true;
+
+  if (T <= 1e-4) {
+    is_valid_ = false;
+    return false;
+  }
+
+  return build_with_time(start, goal, T);
+}
+
+
+bool SpeedMatching::build_with_time(
+  const LongitudinalState& start,
+  const LongitudinalState& goal,
+  double T)
+{
+  T_ = T;
+  double ds = goal.s - start.s;
+  double jmax2 = jmax_ * jmax_;
 
   // 3. Compute Spatial Trajectory Coefficients (Quintic)
   double T2 = T_ * T_;
@@ -84,7 +113,7 @@ bool SpeedMatching::build(
   }
 
   // 6. Compute Final Analytical Cost
-  cost_ = (wT_ * T_) 
+  cost_ = (wT_ * T_)
         + ( ((9.0 * start.a * start.a - 6.0 * start.a * goal.a + 9.0 * goal.a * goal.a) / T_) ) / jmax2
         + ( (((72.0 * start.v + 48.0 * goal.v) * start.a) - 48.0 * (start.v + 1.5 * goal.v) * goal.a) / T2) / jmax2
         + ( ((-120.0 * start.a * ds + 120.0 * goal.a * ds + 192.0 * start.v * start.v + 336.0 * start.v * goal.v + 192.0 * goal.v * goal.v) / T3) ) / jmax2

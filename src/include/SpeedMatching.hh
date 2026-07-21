@@ -45,6 +45,11 @@ namespace vprim {
         // Validates that the velocity never drops below zero during the maneuver
         [[nodiscard]] bool check_velocity() const ;
 
+        // Shared tail of build()/build_fixed_time(): given a numeric T (however it
+        // was obtained), compute the quintic coefficients, cascade the kinematic
+        // polynomials, validate, and compute cost. Does not touch T_ itself.
+        bool build_with_time(const LongitudinalState& start, const LongitudinalState& goal, double T);
+
     public:
         SpeedMatching() = default;
         explicit SpeedMatching(double weight_time, double jerk_limit = 10.0) : wT_(weight_time), jmax_(jerk_limit) {};
@@ -56,6 +61,12 @@ namespace vprim {
         [[nodiscard]] bool is_ok() const { return is_valid_; }
 
         bool build(const LongitudinalState& start, const LongitudinalState& goal) override;
+
+        // Solve for the trajectory over a caller-supplied fixed duration T, instead
+        // of searching for the time-cost-optimal T. Skips the 6th-degree root-find
+        // in build() entirely; useful when T is already dictated externally (e.g.
+        // matching another maneuver's duration).
+        bool build_fixed_time(const LongitudinalState& start, const LongitudinalState& goal, double T);
 
         [[nodiscard]] LongitudinalState eval(double t) const override;
 

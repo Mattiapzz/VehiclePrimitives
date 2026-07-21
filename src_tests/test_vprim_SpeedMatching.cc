@@ -108,6 +108,57 @@ TEST_F(SpeedMatchingTest, PrintTrajectoryProfile) {
 }
 
 
+// 5. build_fixed_time reproduces build()'s own solved T exactly (same boundary
+//    conditions, T supplied instead of searched for -> identical trajectory).
+TEST_F(SpeedMatchingTest, FixedTimeMatchesOptimizerSolution) {
+    SpeedMatching sm_free;
+    ASSERT_TRUE(sm_free.build(start, goal));
+    double T_opt = sm_free.get_T();
+
+    SpeedMatching sm_fixed;
+    ASSERT_TRUE(sm_fixed.build_fixed_time(start, goal, T_opt));
+
+    EXPECT_NEAR(sm_fixed.get_T(), T_opt, 1e-9);
+
+    double tol = 1e-6;
+    for (double t = 0.0; t <= T_opt; t += T_opt / 10.0) {
+        LongitudinalState a = sm_free.eval(t);
+        LongitudinalState b = sm_fixed.eval(t);
+        EXPECT_NEAR(a.s, b.s, tol);
+        EXPECT_NEAR(a.v, b.v, tol);
+        EXPECT_NEAR(a.a, b.a, tol);
+        EXPECT_NEAR(a.j, b.j, tol);
+    }
+}
+
+// 6. build_fixed_time with an arbitrary, non-optimal T still satisfies the
+//    boundary conditions (this is the actual point of the feature: caller
+//    picks T, e.g. to match another maneuver's duration).
+TEST_F(SpeedMatchingTest, FixedTimeArbitraryDurationMatchesBoundaryConditions) {
+    double T_arbitrary = 6.0; // deliberately not the time-optimal value
+    ASSERT_TRUE(sm.build_fixed_time(start, goal, T_arbitrary));
+
+    EXPECT_NEAR(sm.get_T(), T_arbitrary, 1e-9);
+
+    double tol = 1e-3;
+    LongitudinalState eval_start = sm.eval(0.0);
+    LongitudinalState eval_goal = sm.eval(T_arbitrary);
+
+    EXPECT_NEAR(eval_start.s, start.s, tol);
+    EXPECT_NEAR(eval_start.v, start.v, tol);
+    EXPECT_NEAR(eval_start.a, start.a, tol);
+    EXPECT_NEAR(eval_goal.s, goal.s, tol);
+    EXPECT_NEAR(eval_goal.v, goal.v, tol);
+    EXPECT_NEAR(eval_goal.a, goal.a, tol);
+}
+
+// 7. build_fixed_time rejects a non-positive duration instead of solving
+//    garbage.
+TEST_F(SpeedMatchingTest, FixedTimeRejectsNonPositiveDuration) {
+    EXPECT_FALSE(sm.build_fixed_time(start, goal, 0.0));
+    EXPECT_FALSE(sm.build_fixed_time(start, goal, -1.0));
+}
+
 TEST_F(SpeedMatchingTest, PrintTrajectoryProfileNoMinT) {
     sm.set_time_weight(0.0);  
     ASSERT_TRUE(sm.build(start, goal));
