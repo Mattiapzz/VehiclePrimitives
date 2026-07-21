@@ -159,6 +159,42 @@ TEST_F(SpeedMatchingTest, FixedTimeRejectsNonPositiveDuration) {
     EXPECT_FALSE(sm.build_fixed_time(start, goal, -1.0));
 }
 
+// 8. SN (snap) and CR (crackle) match finite-difference derivatives of J (jerk)
+//    at an interior point, since they are just poly_j_ differentiated once
+//    (SN) or twice (CR).
+TEST_F(SpeedMatchingTest, SnapAndCrackleAreDerivativesOfJerk) {
+    ASSERT_TRUE(sm.build(start, goal));
+    double T = sm.get_T();
+    double t_mid = T / 2.0;
+    double h = 1e-5;
+
+    double j_plus = sm.J(t_mid + h);
+    double j_minus = sm.J(t_mid - h);
+    double sn_finite_diff = (j_plus - j_minus) / (2.0 * h);
+
+    EXPECT_NEAR(sm.SN(t_mid), sn_finite_diff, 1e-3);
+
+    double sn_plus = sm.SN(t_mid + h);
+    double sn_minus = sm.SN(t_mid - h);
+    double cr_finite_diff = (sn_plus - sn_minus) / (2.0 * h);
+
+    EXPECT_NEAR(sm.CR(t_mid), cr_finite_diff, 1e-3);
+}
+
+// 9. Both SN and CR are identically zero for the constant-velocity edge case
+//    (a straight-line quintic with only linear s(t) collapses every
+//    derivative above velocity to zero).
+TEST_F(SpeedMatchingTest, SnapAndCrackleAreZeroForConstantVelocity) {
+    LongitudinalState cv_start{0.0, 15.0, 0.0, 0.0};
+    LongitudinalState cv_goal{45.0, 15.0, 0.0, 0.0};
+
+    sm.set_time_weight(0.0);
+    ASSERT_TRUE(sm.build(cv_start, cv_goal));
+
+    EXPECT_NEAR(sm.SN(1.5), 0.0, 1e-3);
+    EXPECT_NEAR(sm.CR(1.5), 0.0, 1e-3);
+}
+
 TEST_F(SpeedMatchingTest, PrintTrajectoryProfileNoMinT) {
     sm.set_time_weight(0.0);  
     ASSERT_TRUE(sm.build(start, goal));

@@ -79,7 +79,13 @@ namespace vprim {
         [[nodiscard]] inline double A(double const t)  { return ( this->poly_a_.eval(std::clamp(t, 0.0, this->T_)) ); }
         [[nodiscard]] inline double J(double const t)  { return ( this->poly_j_.eval(std::clamp(t, 0.0, this->T_)) ); }
 
-        
+        // Snap (4th derivative of position) and crackle (5th derivative), obtained by
+        // differentiating the jerk polynomial in place. These were absent before because
+        // poly_j_ had no way to expose its own derivative externally.
+        [[nodiscard]] inline double SN(double const t) { return ( this->poly_j_.derivative(1).eval(std::clamp(t, 0.0, this->T_)) ); }
+        [[nodiscard]] inline double CR(double const t) { return ( this->poly_j_.derivative(2).eval(std::clamp(t, 0.0, this->T_)) ); }
+
+
 
     };
 
