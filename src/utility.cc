@@ -1,6 +1,8 @@
 
 #include "include/utility.hh"
 
+#include <cmath>
+
 namespace vprim {
 
   size_t Polynomial::degree() const { 

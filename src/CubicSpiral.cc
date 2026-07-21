@@ -1,5 +1,7 @@
 #include "include/CubicSpiral.hh"
 
+#include <cmath>
+
 namespace vprim {
 
   double CubicSpiral::eval_yaw(double s) const {
