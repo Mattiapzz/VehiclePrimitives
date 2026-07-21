@@ -7,6 +7,7 @@
 #include <vector>
 #include <initializer_list>
 #include <cstddef>
+#include <optional>
 
 namespace vprim {
 
