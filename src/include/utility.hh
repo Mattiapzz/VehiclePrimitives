@@ -12,10 +12,10 @@
 namespace vprim {
 
   struct RootSolverOptions {
-      int max_iter = 50;
-      double alpha = 1.0;
-      double step_tolerance = 1e-6;
-      double func_tolerance = 1e-6;
+      int max_iter = 100;
+      double alpha = 0.5;
+      double step_tolerance = 1e-10;
+      double func_tolerance = 1e-10;
   };
   //
   // And update the function signature to:
