@@ -9,3 +9,5 @@ python_bindings/*.egg-info
 python_bindings/*.so
 
 motionsick
+
+*.png

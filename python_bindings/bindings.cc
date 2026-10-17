@@ -6,6 +6,8 @@
 #include "include/utility.hh"
 #include "include/CubicSpiral.hh"
 #include "include/SpeedMatching.hh"
+#include "include/SpeedMatchingSickness.hh"
+#include "include/ComfortMatching.hh"
 
 namespace py = pybind11;
 using namespace vprim;
@@ -69,10 +71,61 @@ PYBIND11_MODULE(vprim_py, m) {
         .def(py::init<>())
         .def(py::init<double>(), py::arg("weight_time"))
         .def("set_time_weight", &SpeedMatching::set_time_weight, py::arg("wT"))
+        .def("set_jerk_limit", &SpeedMatching::set_jerk_limit, py::arg("jmax"))
         .def("get_T", &SpeedMatching::get_T)
         .def_property_readonly("T", &SpeedMatching::get_T) // Pythonic alias
         .def("is_ok", &SpeedMatching::is_ok)
         .def("build", &SpeedMatching::build, py::arg("start"), py::arg("goal"))
         .def("eval", &SpeedMatching::eval, py::arg("t"))
         .def("get_cost", &SpeedMatching::get_cost);
+
+    // From SpeedMatchingSickness.hh
+    py::class_<LTIFilter>(m, "LTIFilter")
+        .def(py::init<>())
+        .def_readwrite("n", &LTIFilter::n)
+        .def_readwrite("A", &LTIFilter::A)
+        .def_readwrite("B", &LTIFilter::B)
+        .def_readwrite("C", &LTIFilter::C);
+
+    m.def("default_motion_sickness_filter", &default_motion_sickness_filter,
+          "Default 2nd-order ISO 2631-1 Wf approximation used throughout "
+          "motion_sickness_filter_minT_notes.md.");
+
+    py::class_<SpeedMatchingSickness>(m, "SpeedMatchingSickness")
+        .def(py::init<>())
+        .def(py::init<double>(), py::arg("weight_time"))
+        .def("set_time_weight", &SpeedMatchingSickness::set_time_weight, py::arg("wT"))
+        .def("set_accel_scale", &SpeedMatchingSickness::set_accel_scale, py::arg("scale"))
+        .def("set_filter", &SpeedMatchingSickness::set_filter, py::arg("filter"))
+        .def("set_filter_initial_state", &SpeedMatchingSickness::set_filter_initial_state, py::arg("q0"))
+        .def("set_search_bounds", &SpeedMatchingSickness::set_search_bounds,
+             py::arg("Tmin"), py::arg("Tmax"), py::arg("n_points") = 400)
+        .def("get_T", &SpeedMatchingSickness::get_T)
+        .def_property_readonly("T", &SpeedMatchingSickness::get_T)
+        .def("is_ok", &SpeedMatchingSickness::is_ok)
+        .def("build", &SpeedMatchingSickness::build, py::arg("start"), py::arg("goal"))
+        .def("eval", &SpeedMatchingSickness::eval, py::arg("t"))
+        .def("get_cost", &SpeedMatchingSickness::get_cost)
+        .def("AW", &SpeedMatchingSickness::AW, py::arg("t"));
+
+    // From ComfortMatching.hh
+    py::class_<ComfortMatching>(m, "ComfortMatching")
+        .def(py::init<>())
+        .def(py::init<double>(), py::arg("weight_time"))
+        .def("set_time_weight", &ComfortMatching::set_time_weight, py::arg("wT"))
+        .def("set_jerk_weight", &ComfortMatching::set_jerk_weight, py::arg("w_j"))
+        .def("set_jerk_limit", &ComfortMatching::set_jerk_limit, py::arg("jmax"))
+        .def("set_accel_weight", &ComfortMatching::set_accel_weight, py::arg("w_a"))
+        .def("set_accel_limit", &ComfortMatching::set_accel_limit, py::arg("a_max"))
+        .def("set_filter", &ComfortMatching::set_filter, py::arg("filter"))
+        .def("set_filter_initial_state", &ComfortMatching::set_filter_initial_state, py::arg("q0"))
+        .def("set_search_bounds", &ComfortMatching::set_search_bounds,
+             py::arg("Tmin"), py::arg("Tmax"), py::arg("n_points") = 400)
+        .def("get_T", &ComfortMatching::get_T)
+        .def_property_readonly("T", &ComfortMatching::get_T)
+        .def("is_ok", &ComfortMatching::is_ok)
+        .def("build", &ComfortMatching::build, py::arg("start"), py::arg("goal"))
+        .def("eval", &ComfortMatching::eval, py::arg("t"))
+        .def("get_cost", &ComfortMatching::get_cost)
+        .def("AW", &ComfortMatching::AW, py::arg("t"));
 }
