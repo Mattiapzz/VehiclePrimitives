@@ -47,6 +47,7 @@ plot's visual drama (overshoot to v_max~18.8, a in [-1.1, +2.5] at jmax=20).
 import numpy as np
 import matplotlib.pyplot as plt
 import vprim_py as vprim
+from plot_utils import legend_above
 
 # ---------------------------------------------------------------------------
 # Figure 1: w_T sweep, same BCs as plot_mp_lon_mintminj.py (v0=16, sT=50,
@@ -107,12 +108,12 @@ for ax in axes1:
     margin = 0.15 * (hi - lo)
     ax.set_ylim(lo - margin, hi + margin)
 
-ax_v.legend(loc="lower right", ncol=2, fontsize=7)
+legend_above(ax_v, ncol=3, fontsize=7, y=1.1)
 fig1.suptitle(
     f"SpeedMatchingSickness: time-weight sweep\n(v0={v0:.0f}, sT={sT:.0f}, vT={vT:.0f}, accel_scale={ACCEL_SCALE:.0f})",
     fontsize=10,
 )
-fig1.tight_layout(rect=[0, 0, 1, 0.94])
+fig1.tight_layout(rect=[0, 0, 1, 0.80])
 fig1.savefig("motion_sickness_sweep.png", dpi=150)
 
 # ---------------------------------------------------------------------------
@@ -135,7 +136,7 @@ print(f"=== v0={v0:.0f}, sT={sT:.0f}, vT={vT:.0f}, w_T={wT_compare:.1f}: filtere
 print(f"  unfiltered (SpeedMatching, jerk^2 cost):      T* = {sm.T:.4f} s   cost = {sm.get_cost():.4f}")
 print(f"  filtered   (SpeedMatchingSickness, a_w^2 cost): T* = {sms.T:.4f} s   cost = {sms.get_cost():.4f}")
 
-fig2, (bx_v, bx_a) = plt.subplots(2, 1, sharex=False, figsize=(7, 6.5))
+fig2, (bx_v, bx_a) = plt.subplots(2, 1, sharex=True, figsize=(7, 6.5))
 
 # x-axis is curvilinear abscissa s (arc length), not time -- T* differs between
 # the two primitives, but both traverse the same [0, sT] interval in space.
@@ -159,26 +160,28 @@ if sms_ok:
     bx_a.plot(s_f, a_f, color="tab:red", lw=1, ls="--", label=r"$a$ (filtered)")
     bx_a.plot(s_f, aw_f, color="tab:red", lw=2, label=r"$a_w$ (filtered)")
 
-bx_v.set_xlabel(r"$s$ [$m$]")
 bx_v.set_xlim(0, sT)
+bx_v.tick_params(labelbottom=False)  # shared x-axis: only the bottom panel labels it
 bx_v.set_ylabel(r"$v$ [$m/s$]")
-bx_v.set_title("Velocity")
 bx_v.grid(True)
-bx_v.legend(fontsize=8)
+legend_above(bx_v, ncol=2, fontsize=8, y=1.15)
 
 bx_a.set_xlabel(r"$s$ [$m$]")
 bx_a.set_xlim(0, sT)
 bx_a.set_ylabel(r"$m/s^2$")
-bx_a.set_title("Acceleration: raw vs frequency-weighted")
 bx_a.grid(True)
-bx_a.legend(fontsize=8)
+# Small (3-entry) legend: fits inside the panel's own empty upper-right
+# corner (curves are near their negative trough there) -- "above axes"
+# doesn't work for a non-top row, since that space is the gap to the row
+# above it, not reserved margin (see bx_v's legend_above for the top row).
+bx_a.legend(fontsize=7, loc="upper right")
 
 fig2.suptitle(
     f"Filtered (motion-sickness, accel_scale={ACCEL_SCALE:.0f}) vs unfiltered (jerk-squared, jmax=20)\n"
     f"v0={v0:.0f}, sT={sT:.0f}, vT={vT:.0f}, $w_T$={wT_compare:.1f}",
     fontsize=10,
 )
-fig2.tight_layout(rect=[0, 0, 1, 0.92])
+fig2.tight_layout(rect=[0, 0, 1, 0.80])
 fig2.savefig("motion_sickness_vs_unfiltered.png", dpi=150)
 
 if __name__ == "__main__":

@@ -33,6 +33,7 @@ session's history for the full root/cost analysis.
 import numpy as np
 import matplotlib.pyplot as plt
 import vprim_py as vprim
+from plot_utils import legend_above
 
 # Boundary conditions: verbatim from Plot_MP_LON_MINTMINJ.m
 v0, a0 = 16.0, 0.0
@@ -80,13 +81,13 @@ for ax in (ax1, ax2, ax3):
     margin = 0.15 * (hi - lo)
     ax.set_ylim(lo - margin, hi + margin)
 
-ax1.legend(loc="lower right", ncol=2, fontsize=8)
+legend_above(ax1, ncol=3, fontsize=8, y=1.1)
 fig.suptitle(
     f"MP_LON_MINTMINJ: min-jerk min-time, time-weight sweep\n"
     f"(v0={v0:.0f}, sT={sT:.0f}, vT={vT:.0f}, jmax={JMAX:.0f} -- tuned to match archived figure, see module docstring)",
     fontsize=10,
 )
-fig.tight_layout(rect=[0, 0, 1, 0.92])
+fig.tight_layout(rect=[0, 0, 1, 0.80])
 
 if __name__ == "__main__":
     fig.savefig("MP_LON_MINTMINJ_states.png", dpi=150)

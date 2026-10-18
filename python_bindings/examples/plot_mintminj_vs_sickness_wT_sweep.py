@@ -19,6 +19,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import vprim_py as vprim
+from plot_utils import legend_above
 
 v0, a0 = 16.0, 0.0
 sT, vT, aT = 50.0, 18.0, 0.0
@@ -31,7 +32,7 @@ WTs = [0.0, 0.3, 0.6, 1.0]
 
 colors = cm.viridis(np.linspace(0.15, 0.9, len(WTs)))
 
-fig, (ax_v, ax_a) = plt.subplots(2, 1, sharex=False, figsize=(7, 7))
+fig, (ax_v, ax_a) = plt.subplots(2, 1, sharex=True, figsize=(7, 7))
 
 for wT, color in zip(WTs, colors):
     wT_eff = max(wT, 1e-6)  # weight_time=0 degenerates the search edge case
@@ -70,16 +71,14 @@ for wT, color in zip(WTs, colors):
         print(f"[sickness] failed to build for wT={wT:.2f}")
 
 ax_v.set_ylabel(r"$v_x$ [$m/s$]")
-ax_v.set_xlabel(r"$s$ [$m$]")
 ax_v.set_xlim(0, sT)
-ax_v.set_title("Velocity")
+ax_v.tick_params(labelbottom=False)  # shared x-axis: only the bottom panel labels it
 ax_v.grid(True)
-ax_v.legend(fontsize=7, ncol=2, loc="lower right")
+legend_above(ax_v, ncol=4, fontsize=6, y=1.12)
 
 ax_a.set_ylabel(r"$a_x$ [$m/s^2$]")
 ax_a.set_xlabel(r"$s$ [$m$]")
 ax_a.set_xlim(0, sT)
-ax_a.set_title("Acceleration")
 ax_a.grid(True)
 
 fig.suptitle(
@@ -87,7 +86,7 @@ fig.suptitle(
     f"v0={v0:.0f}, sT={sT:.0f}, vT={vT:.0f}, $w_T \\in \\{{0, 0.3, 0.6, 1.0\\}}$",
     fontsize=10,
 )
-fig.tight_layout(rect=[0, 0, 1, 0.92])
+fig.tight_layout(rect=[0, 0, 1, 0.82])
 fig.savefig("mintminj_vs_sickness_wT_sweep.png", dpi=150)
 
 if __name__ == "__main__":

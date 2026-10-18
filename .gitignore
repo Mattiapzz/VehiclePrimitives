@@ -11,3 +11,9 @@ python_bindings/*.so
 motionsick
 
 *.png
+
+.cache/
+
+python_bindings/examples/figures_export
+
+**/__pycache__/

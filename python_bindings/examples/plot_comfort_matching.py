@@ -32,6 +32,7 @@ Two figures:
 import numpy as np
 import matplotlib.pyplot as plt
 import vprim_py as vprim
+from plot_utils import legend_above
 
 v0, a0 = 0.0, 0.0
 sT, vT, aT = 100.0, 0.0, 0.0
@@ -84,13 +85,13 @@ for ax in axes1:
     ax.grid(True)
     ax.set_xlim(0, sT)
 
-ax_v.legend(loc="lower right", ncol=2, fontsize=7)
+legend_above(ax_v, ncol=2, fontsize=7, y=1.1)
 fig1.suptitle(
     f"ComfortMatching: time-weight sweep (jointly optimal)\n"
     f"(rest-to-rest, {sT:.0f} m, jmax={JMAX:.0f}, a_max={A_MAX:.0f}, w_j=w_a=1)",
     fontsize=10,
 )
-fig1.tight_layout(rect=[0, 0, 1, 0.94])
+fig1.tight_layout(rect=[0, 0, 1, 0.82])
 fig1.savefig("comfort_matching_sweep.png", dpi=150)
 
 # ---------------------------------------------------------------------------
@@ -161,7 +162,7 @@ if cm_ok:
     aw_cm = integrated_aw_sq(cm.AW, cm.T)
     print(f"  ComfortMatching (jointly optimal):         T* = {cm.T:.4f} s   int(a_w^2) = {aw_cm:.4f}")
 
-fig2, (bx_v, bx_a, bx_aw) = plt.subplots(3, 1, sharex=False, figsize=(7, 9))
+fig2, (bx_v, bx_a, bx_aw) = plt.subplots(3, 1, sharex=True, figsize=(7, 9))
 
 if sm_ok:
     t_u = np.linspace(0.0, sm.T, 201)
@@ -194,24 +195,27 @@ if cm_ok:
     bx_a.plot(s_j, a_j, color="tab:red", lw=1.5, label="ComfortMatching")
     bx_aw.plot(s_j, aw_j, color="tab:red", lw=1.5, label="ComfortMatching (jointly optimal)")
 
-bx_v.set_xlabel(r"$s$ [$m$]"); bx_v.set_xlim(0, sT)
-bx_v.set_ylabel(r"$v$ [$m/s$]"); bx_v.set_title("Velocity")
-bx_v.grid(True); bx_v.legend(fontsize=8)
+bx_v.set_xlim(0, sT)
+bx_v.tick_params(labelbottom=False)  # shared x-axis: only the bottom panel labels it
+bx_v.set_ylabel(r"$v$ [$m/s$]")
+bx_v.grid(True)
+legend_above(bx_v, ncol=1, fontsize=8, y=1.15)
 
-bx_a.set_xlabel(r"$s$ [$m$]"); bx_a.set_xlim(0, sT)
-bx_a.set_ylabel(r"$a$ [$m/s^2$]"); bx_a.set_title("Acceleration")
-bx_a.grid(True); bx_a.legend(fontsize=8)
+bx_a.set_xlim(0, sT)
+bx_a.tick_params(labelbottom=False)
+bx_a.set_ylabel(r"$a$ [$m/s^2$]")
+bx_a.grid(True); bx_a.legend(fontsize=7, loc="upper right")
 
 bx_aw.set_xlabel(r"$s$ [$m$]"); bx_aw.set_xlim(0, sT)
-bx_aw.set_ylabel(r"$a_w$ [$m/s^2$]"); bx_aw.set_title("Filtered (motion-sickness) acceleration")
-bx_aw.grid(True); bx_aw.legend(fontsize=8)
+bx_aw.set_ylabel(r"$a_w$ [$m/s^2$]")
+bx_aw.grid(True); bx_aw.legend(fontsize=7, loc="upper right")
 
 fig2.suptitle(
     f"SpeedMatching vs SpeedMatchingSickness (decoupled) vs ComfortMatching (jointly optimal)\n"
     f"rest-to-rest, {sT:.0f} m, $w_T$={wT_compare:.1f}",
     fontsize=10,
 )
-fig2.tight_layout(rect=[0, 0, 1, 0.92])
+fig2.tight_layout(rect=[0, 0, 1, 0.84])
 fig2.savefig("comfort_matching_comparison.png", dpi=150)
 
 if __name__ == "__main__":
